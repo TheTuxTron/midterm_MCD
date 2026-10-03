@@ -1,0 +1,45 @@
+BITÁCORA DE LIMPIEZA DE DATOS
+============================================================
+Filas iniciales: 284,807
+Filas finales:   283,726
+Filas eliminadas: 1,081
+
+01. Validación de esquema
+    Decisión:      Se verifican las 31 columnas documentadas (Time, V1..V28, Amount, Class) y se descartan columnas ajenas.
+    Justificación: Garantiza que los pasos siguientes operan sobre el contrato de datos descrito en la documentación de Kaggle; falla temprano si el archivo cambia.
+    Filas: 284,807 -> 284,807 (afectadas: 0)
+
+02. Conversión de tipos
+    Decisión:      Time, V1..V28 y Amount a float; Class a numérico (valores no convertibles pasan a NaN).
+    Justificación: El CSV puede traer texto (p.ej. '"0"'); forzar el tipo numérico expone valores corruptos como nulos para tratarlos en el paso siguiente.
+    Filas: 284,807 -> 284,807 (afectadas: 0)
+
+03. Valores nulos
+    Decisión:      Se encontraron 0 celdas nulas; se eliminan las filas con nulos.
+    Justificación: La etiqueta, el monto y el tiempo no pueden imputarse sin sesgar el análisis de fraude, y las V1..V28 son componentes PCA cuyo valor no se puede reconstruir. Eliminar es la opción más honesta (en este dataset el impacto es 0 filas).
+    Filas: 284,807 -> 284,807 (afectadas: 0)
+
+04. Reglas de dominio
+    Decisión:      Se conservan solo filas con Class ∈ {0,1}, Amount ≥ 0 y 0 ≤ Time ≤ 172 800 s (dos días).
+    Justificación: La documentación indica que la etiqueta es binaria, que los datos cubren dos días de septiembre de 2013 y un monto negativo no tiene sentido para una operación (las devoluciones no forman parte de este set).
+    Filas: 284,807 -> 284,807 (afectadas: 0)
+
+05. Duplicados exactos
+    Decisión:      Se eliminan 1081 filas idénticas en las 31 columnas (incluye 19 fraudes); se conserva la primera aparición.
+    Justificación: Coincidir en tiempo, monto y 28 componentes PCA continuas es prácticamente imposible para operaciones distintas: lo tratamos como doble registro (en banca: retransmisión de un mensaje). Mantenerlas inflaría los conteos y filtraría información entre conjuntos de entrenamiento y prueba.
+    Filas: 284,807 -> 283,726 (afectadas: 1,081)
+
+06. Montos en cero
+    Decisión:      Se marcan 1808 operaciones con monto 0 (columna es_monto_cero); no se eliminan.
+    Justificación: Suelen ser verificaciones de cuenta/autorizaciones; los defraudadores las usan para probar credenciales, así que contienen señal de fraude.
+    Filas: 283,726 -> 283,726 (afectadas: 0)
+
+07. Atípicos de monto (IQR)
+    Decisión:      Se marcan 31685 montos > Q3 + 1.5·IQR (= 185.38) en es_atipico_monto; no se eliminan.
+    Justificación: En detección de fraude el fenómeno de interés ES una anomalía: borrar atípicos borraría justamente casos relevantes. Los montos altos son reales (la distribución es de cola larga).
+    Filas: 283,726 -> 283,726 (afectadas: 0)
+
+08. Renombrado y variables derivadas
+    Decisión:      Time→tiempo_seg, Amount→monto, Class→es_fraude; se crean id_transaccion, dia (1 o 2), hora_dia (0-23, relativa al inicio de la captura) y monto_log = ln(1+monto).
+    Justificación: El vocabulario interbancario hace el análisis legible. Time solo es útil convertido a ciclos horarios; el log de monto corrige su fuerte sesgo a la derecha para visualizarlo y modelarlo.
+    Filas: 283,726 -> 283,726 (afectadas: 0)

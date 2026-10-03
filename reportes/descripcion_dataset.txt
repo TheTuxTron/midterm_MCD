@@ -1,0 +1,59 @@
+DESCRIPCIÓN DEL SET DE DATOS
+======================================================================
+
+1. ¿Qué es?
+-----------
+"Credit Card Fraud Detection" (Machine Learning Group - Université Libre de Bruxelles (ULB) y Worldline). Son 284,807 operaciones
+reales con tarjeta realizadas por titulares europeos durante dos días de
+septiembre de 2013. Tras la limpieza quedan 283,726 filas.
+
+En este proyecto se usa como ANÁLOGO de un flujo de transferencias
+interbancarias: cada fila es una operación con instante, monto, un vector de
+atributos de comportamiento anonimizados y una etiqueta de fraude. Las
+conclusiones metodológicas (desbalance, patrones horarios, montos de prueba,
+variables latentes) se trasladan directamente a ese dominio.
+
+2. ¿Qué información contiene?
+-----------------------------
+* tiempo_seg (Time): segundos desde la primera operación; cubre 48.0 h.
+* monto (Amount): importe en euros, sin escalar. Total movido:
+  25,102,001.68 EUR, de los cuales 58,591.39 EUR son fraude.
+* V1..V28: 28 componentes principales (PCA) de variables confidenciales. No
+  sabemos qué representan (podrían ser país, canal, comercio, historial…),
+  sólo que están centradas en 0, no correlacionadas entre sí y ordenadas por
+  varianza explicada (V1 es la de mayor varianza).
+* es_fraude (Class): 473 fraudes vs. 283,253 legítimas
+  (0.1667% → desbalance 1:599).
+* Derivadas en la limpieza: dia, hora_dia, monto_log, es_monto_cero,
+  es_atipico_monto, id_transaccion.
+
+3. ¿Cómo se puede describir?
+----------------------------
+* Es un set TABULAR, NUMÉRICO, SIN NULOS, de clasificación BINARIA
+  EXTREMADAMENTE DESBALANCEADA y PRE-ANONIMIZADO. Casi todo el trabajo de
+  ingeniería de atributos ya lo hizo el proveedor (PCA), lo que limita la
+  interpretabilidad de negocio pero protege la privacidad.
+* Contenía 1,081 registros duplicados
+  exactos que se eliminaron (posibles dobles registros).
+* La señal de fraude se concentra en pocas componentes: V14 (KS 0.84), V10 (KS 0.80), V12 (KS 0.78), V4 (KS 0.76), V11 (KS 0.75), V17 (KS 0.74).
+  Componentes como V15, V22, V25, V26 apenas diferencian clases.
+* El monto NO es un buen discriminador aislado: el fraude es frecuente en
+  montos pequeños (pruebas) y la mediana de monto en fraudes es menor que en
+  legítimas.
+* El tiempo muestra un ciclo día/noche: el volumen legítimo cae de madrugada
+  mientras que el fraude se mantiene, por lo que la tasa de fraude es máxima
+  en la hora relativa 2 (la de menor volumen es la 4).
+* Las componentes PCA tienen colas muy pesadas: los valores
+  extremos casi siempre corresponden a fraudes, lo que sugiere modelos
+  robustos a atípicos (árboles) o escalado robusto.
+
+4. Implicaciones para un sistema antifraude interbancario
+---------------------------------------------------------
+* Evaluar con precisión/recall y AUPRC, nunca con exactitud.
+* Usar re-muestreo o pesos de clase y validación estratificada.
+* Incluir atributos de hora/ventana (las operaciones fuera de horario son
+  más riesgosas proporcionalmente).
+* Vigilar operaciones de monto 0 o muy bajo como posibles pruebas.
+* Al no tener identificador de cliente/cuenta, no es posible construir
+  atributos de historial (velocidad, cambios de destino), que en banca son
+  claves: es la principal limitación del análogo.

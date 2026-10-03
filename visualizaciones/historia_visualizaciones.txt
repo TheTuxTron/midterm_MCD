@@ -1,0 +1,58 @@
+LA HISTORIA QUE CUENTAN LAS GRÁFICAS
+======================================================================
+
+01_ridgeline_firma_fraude.png — "La firma del fraude"
+-----------------------------------------------------
+Técnica: ridgeline (joy plot) de densidades por kernel (KDE), con el eje x
+estandarizado contra las operaciones legítimas para comparar filas.
+
+Historia: las operaciones legítimas forman un pico estrecho alrededor de 0 en
+todas las componentes; son "aburridas" y homogéneas. Los fraudes, en cambio,
+se desplazan entre 3 y 10 desviaciones estándar en las componentes
+V14, V10, V12, V4, V11, V17 (KS hasta 0.84): hacia valores negativos en
+la mayoría y hacia positivos en V4 y V11, y con una dispersión muchísimo mayor
+(el fraude es heterogéneo; la normalidad es homogénea). En contraste, en
+V22, V15 (KS ≈ 0.05) ambas curvas se superponen:
+no aportan información. Conclusión: el fraude deja una huella clara pero
+concentrada en pocas dimensiones; un sistema interbancario debería priorizar
+esas señales y puede descartar ruido.
+
+02_reloj_del_riesgo.png — "El reloj del riesgo: el fraude no duerme"
+--------------------------------------------------------------------
+Técnica: diagramas polares de 24 h (radar + barras radiales) y mapa de calor
+día × hora con anotaciones.
+
+Historia: (a) las operaciones legítimas siguen un ritmo humano: sólo el
+7.1% ocurre entre las horas relativas 1 y 6, mientras que el
+24.9% de los fraudes cae en esa franja. (b) Como el volumen
+legítimo se desploma de madrugada pero el fraude sigue, la TASA de fraude se
+dispara: 6.3‰ en promedio de 1 a 6 h frente a 1.3‰ de
+9 a 22 h, con un máximo de 14.5‰ en la hora 2 (la media
+global es 1.67‰). (c) El mapa de calor muestra que el pico
+aparece en las madrugadas de ambos días (más marcado en uno de ellos), por lo
+que es un patrón y no un accidente. Lectura interbancaria: las ventanas de
+baja actividad (noche, fines de semana, fuera del horario de compensación)
+merecen umbrales de alerta más estrictos.
+
+03_tsne_mapa_fraude.png — "Mapa t-SNE"
+--------------------------------------
+Técnica: reducción de dimensionalidad no lineal t-SNE sobre las 28
+componentes y log(monto) escaladas robustamente (todos los fraudes + una
+muestra aleatoria de 6,000 legítimas, para que sea legible).
+
+Historia: la nube azul de legítimas ocupa la mayor parte del mapa mientras que
+los fraudes se agrupan en islas y bordes propios: el 80% de
+los fraudes tiene al menos 7 de sus 10 vecinos también fraudulentos. Esto
+indica que el problema es en gran parte SEPARABLE con modelos no lineales
+(árboles, gradient boosting, k-NN), aunque queda un grupo de fraudes
+"camuflados" dentro de la nube legítima: esos son los que generarán falsos
+negativos y justifican combinar el modelo con reglas de negocio y revisión
+humana.
+
+Síntesis
+--------
+El fraude es raro (≈1.7 de cada 1 000 operaciones), se reconoce por una
+firma concentrada en pocas variables latentes, se vuelve proporcionalmente
+más frecuente cuando la actividad legítima baja y forma regiones propias en
+el espacio de atributos. Las tres vistas apuntan al mismo diseño de sistema:
+modelo no lineal + atributos temporales + métricas para clases desbalanceadas.

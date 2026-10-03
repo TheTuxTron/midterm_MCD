@@ -1,0 +1,562 @@
+{
+  "fuente": {
+    "nombre": "Credit Card Fraud Detection",
+    "kaggle": "https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud",
+    "autores": "Machine Learning Group - Université Libre de Bruxelles (ULB) y Worldline",
+    "licencia": "Database Contents License (DbCL) v1.0",
+    "cita": "Dal Pozzolo, A., Caelen, O., Johnson, R. A. & Bontempi, G. (2015). Calibrating Probability with Undersampling for Unbalanced Classification. IEEE SSCI.",
+    "periodo": "Dos días de septiembre de 2013, titulares europeos",
+    "notas_documentacion": [
+      "V1..V28 son componentes principales (PCA); las variables originales no se publican por confidencialidad.",
+      "Time y Amount son las únicas variables sin transformar por PCA.",
+      "Time = segundos transcurridos entre cada operación y la primera del set.",
+      "Class = 1 en caso de fraude, 0 en otro caso.",
+      "Por el desbalance se recomienda evaluar con AUPRC, no con exactitud."
+    ]
+  },
+  "generado": "2026-10-02T23:42:08",
+  "archivo_crudo": {
+    "ruta": "data\\creditcard.csv",
+    "bytes": 150828752,
+    "md5": "e90efcb83d69faf99fcab8b0255024de"
+  },
+  "base_datos": {
+    "ruta": "data\\transacciones.db",
+    "bytes": 92925952,
+    "tablas": [
+      "transacciones",
+      "diccionario_datos",
+      "log_limpieza"
+    ]
+  },
+  "estructura": {
+    "filas": 283726,
+    "columnas": 37,
+    "memoria_mb": 80.1,
+    "nulos_totales": 0,
+    "tipos": {
+      "float64": 31,
+      "int64": 6
+    }
+  },
+  "limpieza": {
+    "filas_crudas": 284807,
+    "filas_limpias": 283726,
+    "pasos": [
+      "Validación de esquema",
+      "Conversión de tipos",
+      "Valores nulos",
+      "Reglas de dominio",
+      "Duplicados exactos",
+      "Montos en cero",
+      "Atípicos de monto (IQR)",
+      "Renombrado y variables derivadas"
+    ]
+  },
+  "objetivo": {
+    "campo": "es_fraude",
+    "fraudes": 473,
+    "legitimas": 283253,
+    "tasa_fraude_pct": 0.1667,
+    "ratio_desbalance": "1:599"
+  },
+  "cobertura_temporal": {
+    "segundos_min": 0.0,
+    "segundos_max": 172792.0,
+    "horas": 48.0,
+    "dias": 2
+  },
+  "monto": {
+    "total_eur": 25102001.68,
+    "total_fraude_eur": 58591.39,
+    "max_eur": 25691.16
+  },
+  "variables_mas_discriminantes_ks": [
+    {
+      "campo": "V14",
+      "ks_estadistico": 0.838,
+      "d_cohen": -2.228
+    },
+    {
+      "campo": "V10",
+      "ks_estadistico": 0.797,
+      "d_cohen": -1.603
+    },
+    {
+      "campo": "V12",
+      "ks_estadistico": 0.777,
+      "d_cohen": -1.848
+    },
+    {
+      "campo": "V4",
+      "ks_estadistico": 0.761,
+      "d_cohen": 1.985
+    },
+    {
+      "campo": "V11",
+      "ks_estadistico": 0.747,
+      "d_cohen": 1.844
+    },
+    {
+      "campo": "V17",
+      "ks_estadistico": 0.736,
+      "d_cohen": -1.307
+    },
+    {
+      "campo": "V3",
+      "ks_estadistico": 0.695,
+      "d_cohen": -1.35
+    },
+    {
+      "campo": "V16",
+      "ks_estadistico": 0.678,
+      "d_cohen": -1.445
+    }
+  ],
+  "campos": [
+    {
+      "campo": "id_transaccion",
+      "rol": "identificador",
+      "tipo": "int64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 283726,
+      "min": 1.0,
+      "max": 283726.0,
+      "media": 141863.5,
+      "desv_std": 81904.785575
+    },
+    {
+      "campo": "tiempo_seg",
+      "rol": "predictora (original)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 124592,
+      "min": 0.0,
+      "max": 172792.0,
+      "media": 94811.0776,
+      "desv_std": 47481.047891
+    },
+    {
+      "campo": "V1",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -56.40751,
+      "max": 2.45493,
+      "media": 0.005917,
+      "desv_std": 1.948026
+    },
+    {
+      "campo": "V2",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -72.715728,
+      "max": 22.057729,
+      "media": -0.004135,
+      "desv_std": 1.646703
+    },
+    {
+      "campo": "V3",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -48.325589,
+      "max": 9.382558,
+      "media": 0.001613,
+      "desv_std": 1.508682
+    },
+    {
+      "campo": "V4",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -5.683171,
+      "max": 16.875344,
+      "media": -0.002966,
+      "desv_std": 1.414184
+    },
+    {
+      "campo": "V5",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -113.743307,
+      "max": 34.801666,
+      "media": 0.001828,
+      "desv_std": 1.377008
+    },
+    {
+      "campo": "V6",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -26.160506,
+      "max": 73.301626,
+      "media": -0.001139,
+      "desv_std": 1.331931
+    },
+    {
+      "campo": "V7",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -43.557242,
+      "max": 120.589494,
+      "media": 0.001801,
+      "desv_std": 1.227664
+    },
+    {
+      "campo": "V8",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -73.216718,
+      "max": 20.007208,
+      "media": -0.000854,
+      "desv_std": 1.179054
+    },
+    {
+      "campo": "V9",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -13.434066,
+      "max": 15.594995,
+      "media": -0.001596,
+      "desv_std": 1.095492
+    },
+    {
+      "campo": "V10",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -24.588262,
+      "max": 23.745136,
+      "media": -0.001441,
+      "desv_std": 1.076407
+    },
+    {
+      "campo": "V11",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -4.797473,
+      "max": 12.018913,
+      "media": 0.000202,
+      "desv_std": 1.01872
+    },
+    {
+      "campo": "V12",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -18.683715,
+      "max": 7.848392,
+      "media": -0.000715,
+      "desv_std": 0.994674
+    },
+    {
+      "campo": "V13",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -5.791881,
+      "max": 7.126883,
+      "media": 0.000603,
+      "desv_std": 0.99543
+    },
+    {
+      "campo": "V14",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -19.214325,
+      "max": 10.526766,
+      "media": 0.000252,
+      "desv_std": 0.952215
+    },
+    {
+      "campo": "V15",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -4.498945,
+      "max": 8.877742,
+      "media": 0.001043,
+      "desv_std": 0.914894
+    },
+    {
+      "campo": "V16",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -14.129855,
+      "max": 17.315112,
+      "media": 0.001162,
+      "desv_std": 0.873696
+    },
+    {
+      "campo": "V17",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -25.162799,
+      "max": 9.253526,
+      "media": 0.00017,
+      "desv_std": 0.842507
+    },
+    {
+      "campo": "V18",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -9.498746,
+      "max": 5.041069,
+      "media": 0.001515,
+      "desv_std": 0.837378
+    },
+    {
+      "campo": "V19",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -7.213527,
+      "max": 5.591971,
+      "media": -0.000264,
+      "desv_std": 0.813379
+    },
+    {
+      "campo": "V20",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -54.49772,
+      "max": 39.420904,
+      "media": 0.000187,
+      "desv_std": 0.769984
+    },
+    {
+      "campo": "V21",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -34.830382,
+      "max": 27.202839,
+      "media": -0.000371,
+      "desv_std": 0.723909
+    },
+    {
+      "campo": "V22",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -10.933144,
+      "max": 10.50309,
+      "media": -1.5e-05,
+      "desv_std": 0.72455
+    },
+    {
+      "campo": "V23",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -44.807735,
+      "max": 22.528412,
+      "media": 0.000198,
+      "desv_std": 0.623702
+    },
+    {
+      "campo": "V24",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -2.836627,
+      "max": 4.584549,
+      "media": 0.000214,
+      "desv_std": 0.605627
+    },
+    {
+      "campo": "V25",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -10.295397,
+      "max": 7.519589,
+      "media": -0.000232,
+      "desv_std": 0.52122
+    },
+    {
+      "campo": "V26",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -2.604551,
+      "max": 3.517346,
+      "media": 0.000149,
+      "desv_std": 0.482053
+    },
+    {
+      "campo": "V27",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -22.565679,
+      "max": 31.612198,
+      "media": 0.001763,
+      "desv_std": 0.395744
+    },
+    {
+      "campo": "V28",
+      "rol": "predictora (PCA anonimizada)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 275663,
+      "min": -15.430084,
+      "max": 33.847808,
+      "media": 0.000547,
+      "desv_std": 0.328027
+    },
+    {
+      "campo": "monto",
+      "rol": "predictora (original)",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 32767,
+      "min": 0.0,
+      "max": 25691.16,
+      "media": 88.472687,
+      "desv_std": 250.399437
+    },
+    {
+      "campo": "es_fraude",
+      "rol": "objetivo",
+      "tipo": "int64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 2,
+      "min": 0.0,
+      "max": 1.0,
+      "media": 0.001667,
+      "desv_std": 0.040796
+    },
+    {
+      "campo": "es_monto_cero",
+      "rol": "bandera derivada",
+      "tipo": "int64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 2,
+      "min": 0.0,
+      "max": 1.0,
+      "media": 0.006372,
+      "desv_std": 0.079572
+    },
+    {
+      "campo": "es_atipico_monto",
+      "rol": "bandera derivada",
+      "tipo": "int64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 2,
+      "min": 0.0,
+      "max": 1.0,
+      "media": 0.111675,
+      "desv_std": 0.314966
+    },
+    {
+      "campo": "dia",
+      "rol": "derivada",
+      "tipo": "int64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 2,
+      "min": 1.0,
+      "max": 2.0,
+      "media": 1.491636,
+      "desv_std": 0.499931
+    },
+    {
+      "campo": "hora_dia",
+      "rol": "derivada",
+      "tipo": "int64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 24,
+      "min": 0.0,
+      "max": 23.0,
+      "media": 14.045646,
+      "desv_std": 5.834817
+    },
+    {
+      "campo": "monto_log",
+      "rol": "derivada",
+      "tipo": "float64",
+      "n": 283726,
+      "nulos": 0,
+      "unicos": 32767,
+      "min": 0.0,
+      "max": 10.153941,
+      "media": 3.15376,
+      "desv_std": 1.65708
+    }
+  ]
+}
