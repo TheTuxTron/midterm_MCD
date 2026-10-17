@@ -1,0 +1,100 @@
+MODELADO - PARTE 3: PREDICCIÓN DE FRAUDE EN OPERACIONES FUTURAS
+======================================================================
+
+Adaptación: el enunciado pide predecir ventas futuras. En fraude
+transaccional la predicción útil es: dada una operación NUEVA, ¿qué tan
+probable es que sea fraude y qué hacemos con ella?
+
+1. Nuevas características (dentro del pipeline)
+-----------------------------------------------
+* hora_sin, hora_cos: "época" del día como ciclo (equivale a la "época del
+  año" del enunciado; aquí el patrón es diario).
+* es_madrugada: franja 1-6 h, donde la tasa de fraude es ~5 veces mayor.
+* monto_log: corrige la cola larga del monto.
+* es_monto_cero: posibles operaciones de prueba.
+* V1..V28 pasan sin cambios. Todo se estandariza con StandardScaler.
+El pipeline recibe la transacción cruda (tiempo_seg, monto, V1..V28), así que
+el mismo objeto sirve para entrenar y para puntuar en tiempo real.
+
+2. Partición entrenamiento / prueba
+-----------------------------------
+Temporal, porque el modelo debe predecir el FUTURO:
+* Entrenamiento: 212,794 operaciones (380 fraudes), horas 0.0-38.7
+* Prueba:        70,932 operaciones (93 fraudes), horas 38.7-48.0
+
+3. Algoritmo
+------------
+Random forest, elegido en la Parte 1 por tener la mayor AUPRC en validación
+cruzada frente a la regresión logística y el gradient boosting. Usa
+class_weight="balanced_subsample" para compensar el desbalance (1:558).
+
+4. Política de decisión (umbrales elegidos SIN ver la prueba)
+--------------------------------------------------------------
+Con las predicciones fuera de pliegue del entrenamiento:
+* BLOQUEAR  si puntaje >= 0.380: menor umbral con precisión >= 90%
+            (bloquear a un cliente legítimo es caro: debe haber mucha certeza).
+* REVISAR   si puntaje >= 0.030: menor umbral con precisión >= 50%
+            (el analista confirma al menos 1 de cada 2 alertas).
+* APROBAR   en otro caso.
+
+5. Evaluación en el período de prueba (operaciones futuras)
+------------------------------------------------------------
+AUPRC = 0.809   ROC-AUC = 0.946   (azar: AUPRC = 0.0013)
+
+Métricas por umbral (alerta = puntaje >= umbral):
+               umbral  alertas  vp   fp  fn     vn  precision  recall     f1  monto_fraude_detectado  monto_fraude_no_detectado
+revisar_o_mas  0.0300      217  77  140  16  70699      0.355   0.828  0.497                 8464.27                    2373.27
+bloquear       0.3795       69  68    1  25  70838      0.986   0.731  0.840                 6871.70                    3965.84
+umbral_0.5     0.5000       64  63    1  30  70838      0.984   0.677  0.803                 6321.18                    4516.36
+
+Decisión de la política vs. realidad:
+real      Normal  Fraudulenta
+decisión                     
+APROBAR    70699           16
+REVISAR      139            9
+BLOQUEAR       1           68
+
+Lectura:
+* Con el umbral de REVISIÓN se detecta el 83% de los fraudes futuros
+  (77 de 93) y se generan 217 alertas entre 70,932 operaciones
+  (0.31%); el 35% de ellas es fraude real
+  (el objetivo fijado con datos de entrenamiento era 50%).
+* Con el umbral de BLOQUEO se detiene automáticamente el 73% de los fraudes
+  con una precisión de 99% (1 operación(es) legítima(s) bloqueada(s)).
+* Monto: se detecta 8,464.27 EUR de 10,837.54 EUR defraudados en el período
+  (78%).
+* Los 16 fraudes no detectados son los "camuflados" que el mapa t-SNE
+  mostraba dentro de la nube legítima: hacen falta otras señales (historial
+  de la cuenta, dispositivo, destino) que este set no incluye.
+* Deriva temporal: la AUPRC pasa de 0.848 (validación cruzada) a 0.809
+  en el futuro, y la precisión del umbral de revisión baja de 50% a
+  35%. El bloqueo sigue siendo muy preciso; la franja de revisión es
+  la más sensible a los cambios. Un sistema real debe recalibrar los umbrales
+  con datos recientes y re-entrenar periódicamente.
+
+6. ¿Qué mira el modelo? (ml_05_importancia_variables.png)
+---------------------------------------------------------
+Importancia por permutación (caída de AUPRC al desordenar cada variable):
+        media    desv
+V4     0.0384  0.0052
+V14    0.0261  0.0022
+V17    0.0101  0.0019
+V7     0.0058  0.0024
+monto  0.0055  0.0023
+V11    0.0053  0.0038
+V26    0.0049  0.0012
+V3     0.0049  0.0028
+V8     0.0040  0.0022
+V22    0.0032  0.0022
+Las tres más importantes (V4, V14, V17) están entre las más discriminantes
+del EDA. Otras que el EDA destacaba (V10, V12) bajan aquí porque, dentro de
+los fraudes, llevan información redundante con V14: al desordenar una, el
+bosque compensa con las demás. La hora y el monto aportan poco por sí solos
+cuando ya están las componentes de comportamiento.
+
+7. Artefacto para producción
+----------------------------
+modelos/detector_fraude.joblib contiene el pipeline, los umbrales, las columnas de
+entrada y la referencia de operaciones normales para explicar alertas.
+Metadatos legibles en modelos/detector_fraude_meta.json.
+Uso en tiempo real: src/detector_tiempo_real.py

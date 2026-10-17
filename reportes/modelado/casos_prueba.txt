@@ -1,0 +1,33 @@
+CASOS DE PRUEBA DEL DETECTOR
+======================================================================
+Umbrales: REVISAR >= 0.030 · BLOQUEAR >= 0.380
+
+1. Operación normal típica (real, del período de prueba)
+    id=212795 · clase real: Normal · esperado: APROBAR
+    obtenido: APROBAR [OK] · puntaje 0.000 · 18.5 ms
+
+2. Fraude real con perfil claro (real)
+    id=261598 · clase real: Fraudulenta · esperado: BLOQUEAR
+    obtenido: BLOQUEAR [OK] · puntaje 0.995 · 20.6 ms
+    motivos: V14 bajo (z=-12.4); V17 bajo (z=-7.8); V12 bajo (z=-7.0)
+
+3. Fraude real 'camuflado' (real, el de menor puntaje)
+    id=214019 · clase real: Fraudulenta · esperado: APROBAR (limitación conocida)
+    obtenido: APROBAR [OK] · puntaje 0.000 · 17.1 ms
+
+4. Ataque sintético: operación típica con V14/V12/V10/V17/V4 de fraude
+    id=sint-1 · clase real: Sintético · esperado: REVISAR o BLOQUEAR
+    obtenido: REVISAR [OK] · puntaje 0.310 · 24.6 ms
+    motivos: V17 bajo (z=-8.2); V14 bajo (z=-7.5); V12 bajo (z=-6.0)
+
+5. Monto 0 a las 3 h con comportamiento normal
+    id=sint-2 · clase real: Sintético · esperado: APROBAR (una regla sola no basta)
+    obtenido: APROBAR [OK] · puntaje 0.000 · 20.1 ms
+
+6. Transacción sin el campo V14
+    id=inv-1 · clase real: Inválida · esperado: ERROR DE DATOS
+    obtenido: ERROR DE DATOS [OK] · rechazada: Faltan campos: V14
+
+7. Transacción con monto negativo
+    id=inv-2 · clase real: Inválida · esperado: ERROR DE DATOS
+    obtenido: ERROR DE DATOS [OK] · rechazada: El monto no puede ser negativo

@@ -1,0 +1,18 @@
+RESUMEN DE LA SIMULACIÓN EN TIEMPO REAL
+======================================================================
+Período: horas 38.7-48.0 (9.3 h), 70,932 operaciones
+en micro-lotes de 60 s (559 lotes, mediana 131 operaciones por lote).
+
+Decisiones: {'APROBAR': 70715, 'REVISAR': 148, 'BLOQUEAR': 69}
+Alertas por hora (promedio): 23.3
+Fraudes: 93 ocurridos · 77 detectados (83%) ·
+         68 bloqueados automáticamente
+Precisión de las alertas: 35%
+Monto defraudado detectado: 8,464.27 de 10,837.54 EUR
+
+Latencia por transacción individual (300 llamadas a evaluar()):
+  p50 = 16.1 ms · p95 = 24.5 ms · máx = 95.1 ms
+Latencia por micro-lote de 1 minuto: mediana 18 ms
+
+Archivos: reportes/modelado/simulacion_alertas.csv (cada alerta con motivos),
+          visualizaciones/ml_06_simulacion_tiempo_real.png

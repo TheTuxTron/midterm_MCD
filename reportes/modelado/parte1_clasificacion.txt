@@ -1,0 +1,58 @@
+MODELADO - PARTE 1: CLASIFICACIÓN DE TRANSACCIONES
+======================================================================
+
+1. Definición de las dos clases
+-------------------------------
+El enunciado original pide separar "Clientes Normales" de "Clientes Premium"
+con un criterio a definir (volumen, cantidades...). En fraude transaccional la
+pregunta equivalente es si una operación es NORMAL o FRAUDULENTA, y aquí la
+clase no hay que inventarla: viene de la investigación posterior del banco
+(contracargos, reclamos y casos confirmados), que es la columna es_fraude.
+
+Nueva columna: clase_transaccion = "Normal" si es_fraude = 0
+                                   "Fraudulenta" si es_fraude = 1
+clase_transaccion
+Normal         283253
+Fraudulenta       473
+
+¿Por qué no definirla con una regla (p. ej. "monto > X" o "de madrugada")?
+Porque el EDA muestra que ninguna variable aislada separa las clases (el monto
+tiene KS 0.27). Una regla simple etiquetaría mal a la mayoría. Las reglas sí
+aparecen después, como POLÍTICA sobre el puntaje del modelo
+(Aprobar / Revisar / Bloquear, Parte 3).
+
+2. Protocolo de entrenamiento
+-----------------------------
+* Datos: el 75% más antiguo (212,794 operaciones, 380 fraudes). El 25%
+  más reciente queda reservado para la Parte 3 y no se usa aquí.
+* Entrada del modelo: la transacción cruda (tiempo_seg, monto, V1..V28). El
+  pipeline deriva hora_sin, hora_cos, es_madrugada, monto_log y es_monto_cero,
+  y luego escala (StandardScaler).
+* Validación cruzada estratificada de 5 pliegues, para que cada pliegue
+  tenga la misma proporción de fraude.
+* Desbalance: se compensa con class_weight="balanced" (pesos de clase)
+  en lugar de sobremuestrear, porque así no se generan fraudes sintéticos.
+* Métrica principal: AUPRC (área bajo la curva precisión-recall), la que
+  recomienda la documentación del dataset para clases desbalanceadas.
+
+3. Resultados (media de 5 pliegues; precisión/recall/F1 con umbral 0.5)
+----------------------------------------------------------------------
+                               auprc_mean  auprc_std  roc_auc_mean  exactitud_mean  precision_mean  recall_mean  f1_mean
+modelo                                                                                                                  
+Línea base (siempre 'Normal')       0.002      0.000         0.500          0.9982           0.000        0.000    0.000
+Regresión logística                 0.708      0.051         0.975          0.9768           0.066        0.908    0.123
+Random forest                       0.848      0.033         0.956          0.9995           0.932        0.782    0.849
+Gradient boosting (HGB)             0.731      0.060         0.950          0.9979           0.468        0.847    0.599
+
+4. Lectura
+----------
+* La línea base predice siempre "Normal" y logra 99.82% de exactitud
+  sin detectar un solo fraude (recall 0). Por eso la exactitud no sirve aquí.
+* Modelo elegido: Random forest (AUPRC 0.848).
+* La regresión logística tiene un recall alto con el umbral 0.5, pero una
+  precisión muy baja: genera demasiadas alertas falsas. Los modelos de árboles
+  capturan relaciones no lineales (las "islas" de fraude del mapa t-SNE).
+* El umbral 0.5 es arbitrario. En la Parte 3 se eligen umbrales de negocio
+  con estas mismas predicciones fuera de pliegue.
+
+Gráfica: visualizaciones/ml_01_comparacion_modelos.png

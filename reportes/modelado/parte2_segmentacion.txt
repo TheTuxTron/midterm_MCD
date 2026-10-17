@@ -1,0 +1,97 @@
+MODELADO - PARTE 2: SEGMENTACIÓN DE TRANSACCIONES
+======================================================================
+
+Adaptación: el enunciado pide segmentar clientes, pero este set no tiene
+identificador de cliente ni de cuenta. Se segmentan TRANSACCIONES en perfiles
+de comportamiento y luego se mide el fraude en cada perfil (la etiqueta no
+participa en el agrupamiento).
+
+Variables (estandarizadas): V14, V10, V12, V4, V11, V17, V3, V7, monto_log, hora_sin, hora_cos
+Las 8 componentes más informativas del EDA, el log del monto y la hora
+codificada como ciclo (seno/coseno). Usar las 28 componentes diluye las
+distancias y perjudica sobre todo a Mean Shift.
+
+Ajuste: muestra aleatoria de 20,000 operaciones (proporción natural de
+fraude); luego `predict` asigna las 283,726 operaciones.
+Las asignaciones se guardaron en la tabla SQLite `segmentos`.
+
+1. K-means
+----------
+Selección de k (ml_02_kmeans_seleccion_k.png):
+ k    inercia  silhouette
+ 2 194682.756       0.129
+ 3 178520.803       0.139
+ 4 165800.205       0.143
+ 5 157214.764       0.119
+ 6 149101.226       0.128
+ 7 141420.137       0.131
+ 8 135693.270       0.127
+ 9 130867.305       0.113
+10 126399.091       0.115
+
+El silhouette es bajo y plano (0.113-0.143): las transacciones NO forman
+grupos naturales bien separados, sino un continuo. El codo tampoco es
+marcado. Regla usada: el k más granular cuyo silhouette queda a menos de
+0.005 del mejor -> k = 4.
+
+Segmentos (tasa base de fraude = 1.67‰):
+segmento  operaciones pct_operaciones  fraudes tasa_fraude_por_mil veces_tasa_base pct_del_fraude monto_mediano pct_madrugada
+      K0       120729           42.55       86                0.71             0.4           18.2         30.53           0.1
+      K1          291            0.10      249              855.67           513.3           52.6         30.31          36.8
+      K2        20225            7.13       33                1.63             1.0            7.0         15.62          99.4
+      K3       142481           50.22      105                0.74             0.4           22.2         17.84           0.0
+
+Descripción:
+  K0: hora ≈ 10 h
+  K1: V17 muy bajo, V14 muy bajo, V12 muy bajo, hora ≈ 6 h
+  K2: V12 muy bajo, V14 alto, V11 alto, hora ≈ 4 h
+  K3: hora ≈ 21 h
+
+2. Mean Shift
+-------------
+No requiere fijar k: el ancho de banda (bandwidth = 3.13, estimado con
+estimate_bandwidth, cuantil 0.1) define el tamaño de los "picos" de densidad.
+Encontró 42 clusters. Los menores al 0.5% se agrupan en "M-otros"
+para la tabla:
+segmento  operaciones pct_operaciones  fraudes tasa_fraude_por_mil veces_tasa_base pct_del_fraude monto_mediano pct_madrugada
+      M0       271505           95.69       51                0.19             0.1           10.8         22.48           6.4
+      M5         1639            0.58        8                4.88             2.9            1.7         16.94          98.8
+     M33         1973            0.70       27               13.68             8.2            5.7          1.79           0.7
+ M-otros         8609            3.03      387               44.95            27.0           81.8         25.03          14.7
+
+Descripción:
+  M0: perfil promedio
+  M5: V12 muy bajo, V17 muy alto, V4 alto, hora ≈ 4 h
+  M33: V17 muy alto, V14 muy bajo, V3 bajo
+  M-otros: V3 bajo, V10 alto
+
+3. Comparación
+--------------
+           n_segmentos                  parametro silhouette davies_bouldin pct_mayor_segmento pct_fraude_en_segmentos_10x segundos_ajuste
+K-means              4   k elegido por silhouette   0.142019         1.7858          50.217816                   52.642706        1.330255
+Mean Shift          42  bandwidth 3.13 (estimado)   0.174972       1.335225          95.692675                   81.818182        2.862417
+
+Coincidencia entre ambas particiones (Adjusted Rand Index): 0.022
+
+Lectura:
+* K-means divide el grueso de las operaciones en segmentos amplios que se
+  diferencian sobre todo por la franja horaria, y además aísla un segmento
+  diminuto: K1 (291 operaciones, 0.10%) con una tasa de fraude de
+  856‰ (513 veces la base), que reúne el 53% de todos los fraudes.
+  El algoritmo aisló un perfil de ataque SIN ver la etiqueta. Su perfil:
+  V17 muy bajo, V14 muy bajo, V12 muy bajo, hora ≈ 6 h (las mismas señales que mostró el EDA).
+* Mean Shift encuentra un modo dominante, la operación "normal" (96% del
+  total, con 0.19‰ de fraude), y 41 clusters pequeños en la periferia que,
+  sumados (4.3% de las operaciones), concentran el 89% del fraude.
+  Funciona como un detector de anomalías: lo raro queda en clusters chicos.
+* Métricas internas: Mean Shift obtiene mejor silhouette y Davies-Bouldin,
+  pero en buena parte porque mete casi todo en un solo cluster. Con datos
+  tan desbalanceados, esas métricas no bastan para comparar.
+* ARI = 0.02: las dos técnicas dividen el espacio de forma muy distinta.
+  K-means sirve para PERFILAR (pocos segmentos, descriptibles y accionables).
+  Mean Shift sirve para SEPARAR LO ATÍPICO sin fijar k, pero depende mucho del
+  bandwidth y escala peor: es O(n²), por eso se ajustó con 10,000
+  operaciones (2.9 s) frente a 20,000 de K-means (1.3 s).
+* Uso práctico: el segmento puede servir como regla de priorización o como
+  variable adicional del modelo supervisado. No reemplaza al clasificador:
+  con K-means, el 47% de los fraudes queda en segmentos de riesgo bajo.

@@ -1,0 +1,66 @@
+{
+  "modelo_elegido": "Random forest",
+  "criterio": "mayor AUPRC media en CV",
+  "metricas_cv": [
+    {
+      "modelo": "Línea base (siempre 'Normal')",
+      "auprc_mean": 0.002,
+      "auprc_std": 0.0,
+      "roc_auc_mean": 0.5,
+      "roc_auc_std": 0.0,
+      "exactitud_mean": 0.9982,
+      "exactitud_std": 0.0,
+      "precision_mean": 0.0,
+      "precision_std": 0.0,
+      "recall_mean": 0.0,
+      "recall_std": 0.0,
+      "f1_mean": 0.0,
+      "f1_std": 0.0
+    },
+    {
+      "modelo": "Regresión logística",
+      "auprc_mean": 0.708,
+      "auprc_std": 0.051,
+      "roc_auc_mean": 0.975,
+      "roc_auc_std": 0.01,
+      "exactitud_mean": 0.9768,
+      "exactitud_std": 0.002,
+      "precision_mean": 0.066,
+      "precision_std": 0.005,
+      "recall_mean": 0.908,
+      "recall_std": 0.016,
+      "f1_mean": 0.123,
+      "f1_std": 0.008
+    },
+    {
+      "modelo": "Random forest",
+      "auprc_mean": 0.848,
+      "auprc_std": 0.033,
+      "roc_auc_mean": 0.956,
+      "roc_auc_std": 0.015,
+      "exactitud_mean": 0.9995,
+      "exactitud_std": 0.0,
+      "precision_mean": 0.932,
+      "precision_std": 0.045,
+      "recall_mean": 0.782,
+      "recall_std": 0.055,
+      "f1_mean": 0.849,
+      "f1_std": 0.04
+    },
+    {
+      "modelo": "Gradient boosting (HGB)",
+      "auprc_mean": 0.731,
+      "auprc_std": 0.06,
+      "roc_auc_mean": 0.95,
+      "roc_auc_std": 0.033,
+      "exactitud_mean": 0.9979,
+      "exactitud_std": 0.001,
+      "precision_mean": 0.468,
+      "precision_std": 0.105,
+      "recall_mean": 0.847,
+      "recall_std": 0.051,
+      "f1_mean": 0.599,
+      "f1_std": 0.093
+    }
+  ]
+}

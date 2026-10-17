@@ -1,0 +1,62 @@
+MODELADO - PARTE 0: PREPARACIÓN
+======================================================================
+
+1. Carga en pandas
+------------------
+Tabla `transacciones` de transacciones.db -> DataFrame de 283,726 filas
+× 37 columnas, ordenado cronológicamente por tiempo_seg.
+
+2. Verificación de limpieza (detalle en reportes/log_limpieza.txt)
+------------------------------------------------------------------
+[OK] Sin valores nulos
+[OK] Sin duplicados en las variables de la transacción
+[OK] Etiqueta binaria (0/1)
+[OK] Montos no negativos
+[OK] Orden cronológico
+
+Equivalencias con el enunciado original (Online Retail II):
+* "Transacciones sin ID de cliente / pedidos canceladas" -> aquí no hay cliente
+  ni cancelaciones; los registros irrelevantes son los duplicados exactos
+  (1,081 eliminados) y los fuera de dominio (0).
+* No hay valores faltantes que imputar.
+
+3. Variables clave
+------------------
+* monto: mediana 22.00 EUR, media 88.47 EUR, máximo
+  25,691.16 EUR (cola larga -> se modela como log(1+monto)).
+* hora: ciclo de 24 h derivado de tiempo_seg.
+* V1..V28: atributos de comportamiento anonimizados (PCA).
+
+4. "Productos más vendidos" -> rangos de monto
+---------------------------------------------
+              operaciones  fraudes  tasa_fraude_por_mil  pct_del_fraude
+0 (cero)             1808       25                13.83             5.3
+(0, 1]              28523      146                 5.12            30.9
+(1, 10]             69490       67                 0.96            14.2
+(10, 50]            90327       55                 0.61            11.6
+(50, 100]           37179       55                 1.48            11.6
+(100, 250]          33828       54                 1.60            11.4
+(250, 500]          13462       37                 2.75             7.8
+(500, 1000]          6174       25                 4.05             5.3
+(1000, 5000]         2880        9                 3.12             1.9
+(5000, inf]            55        0                 0.00             0.0
+
+La mayoría de las operaciones está entre 1 y 50 EUR. El fraude se concentra
+en montos muy bajos (0-1 EUR: 36% de los fraudes, típicas
+pruebas de credenciales) y su tasa vuelve a subir entre 250 y 1,000 EUR.
+
+5. Tendencia temporal y períodos pico (ml_00_tendencia_temporal.png)
+--------------------------------------------------------------------
+* Pico de volumen: hora 21 (9,875 operaciones).
+* Valle de volumen: hora 4 (1,082 operaciones).
+* Pico de fraude: hora 11 (43 fraudes, un ataque concentrado).
+El "patrón estacional" de este set es diario: el volumen legítimo sigue el
+ciclo humano día/noche y el fraude no: aparece en ráfagas, también cuando casi
+no hay actividad legítima (madrugadas), donde su TASA es máxima.
+
+6. Partición para el modelado
+-----------------------------
+Partición TEMPORAL (no aleatoria): se entrena con el 75% más antiguo y se
+prueba con el 25% más reciente, como pasaría al poner el modelo en producción.
+* Entrenamiento: 212,794 operaciones, 380 fraudes (0.179%), horas 0.0-38.7
+* Prueba:        70,932 operaciones, 93 fraudes (0.131%), horas 38.7-48.0
